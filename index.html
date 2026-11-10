@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>La Carrera</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b1020">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="La Carrera">
+<style>
+:root{--bg:#0b1020;--card:#151b2e;--text:#e8ecf5;--muted:#8b93a7;--line:#252d45;--david:#3b82f6;--laura:#ec4899;--ok:#22c55e}
+@media (prefers-color-scheme: light){:root{--bg:#f4f6fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+main{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 32px)}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+h1{margin:0;font-size:24px;letter-spacing:-.5px}
+h1 span{font-weight:400;color:var(--muted);font-size:14px;display:block;letter-spacing:0}
+h2{margin:0 0 10px;font-size:16px}
+button{font:inherit;cursor:pointer}
+.chip-btn{background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.aviso{background:#f59e0b22;border:1px solid #f59e0b66;border-radius:12px;padding:10px 12px;font-size:13px;margin-bottom:14px}
+.score{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.pl{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;position:relative;overflow:hidden}
+.pl::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--c)}
+.pl .n{font-weight:700;color:var(--c);display:flex;justify-content:space-between;align-items:center}
+.pl .lead{font-size:11px;background:var(--c);color:#fff;border-radius:999px;padding:1px 8px;font-weight:600}
+.pl .big{font-size:30px;font-weight:800;letter-spacing:-1px;margin:4px 0 0}
+.pl .s{color:var(--muted);font-size:12.5px}
+.bar{height:8px;background:var(--line);border-radius:99px;margin:10px 0 6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c);border-radius:99px;transition:width .6s}
+.hitos{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.hitos b{font-size:11px;font-weight:600;border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 5px}
+.hitos b.ok{background:var(--c);border-color:var(--c);color:#fff}
+form{display:flex;gap:8px;flex-wrap:wrap}
+input{font:inherit;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+#peso{flex:1;font-size:20px;font-weight:700}
+input[type=date]{flex:1 1 140px}
+.btn{background:var(--me,var(--david));color:#fff;border:0;border-radius:10px;padding:10px 18px;font-weight:700;flex:1 1 100%}
+.msg{font-size:13px;color:var(--muted);margin:8px 0 0;min-height:1em}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.row h2{margin:0}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:2px}
+.seg button{border:0;background:none;color:var(--muted);padding:4px 12px;border-radius:8px;font-weight:600}
+.seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px #0003}
+.chartbox{position:relative;height:260px}
+.hint{color:var(--muted);font-size:12px;margin:8px 0 0}
+.liga-score{display:flex;align-items:center;justify-content:center;gap:14px;font-size:28px;font-weight:800;margin:2px 0 12px}
+.liga-score .d{color:var(--david)}.liga-score .l{color:var(--laura)}
+.liga-score small{font-size:13px;color:var(--muted);font-weight:500}
+.mes{display:grid;grid-template-columns:1fr auto auto;gap:4px 12px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.mes .t{}
+.mes .t small{display:block;color:var(--muted);font-size:12px}
+.mes .v{font-variant-numeric:tabular-nums;text-align:right;font-size:13px}
+.tag{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;color:#fff}
+.h{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.h .dot{width:10px;height:10px;border-radius:50%}
+.h .f{color:var(--muted);font-size:13px}
+.h .p{font-weight:700;font-variant-numeric:tabular-nums}
+.h .df{font-size:12px;font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+.h .x{background:none;border:0;color:var(--muted);padding:0 0 0 4px;font-size:16px}
+.up{color:#ef4444}.down{color:var(--ok)}
+.win{text-align:center;border-color:var(--c);background:linear-gradient(135deg,var(--card),color-mix(in srgb,var(--c) 18%,var(--card)))}
+.win .big{font-size:26px;font-weight:800;color:var(--c)}
+.modal{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal[hidden]{display:none}
+.modal .card{width:100%;max-width:360px;margin:0}
+.who{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.who button{border:2px solid var(--line);background:var(--bg);color:var(--text);border-radius:12px;padding:16px;font-weight:700;font-size:17px}
+.who button.sel{border-color:var(--c);color:var(--c)}
+.empty{color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>La Carrera <span id="sub"></span></h1>
+    <button class="chip-btn" id="quienBtn">¿Quién eres?</button>
+  </header>
+
+  <div class="aviso" id="aviso" hidden></div>
+  <section class="card win" id="ganador" hidden></section>
+  <section class="score" id="score"></section>
+
+  <section class="card">
+    <h2 id="formTit">Pesaje de hoy</h2>
+    <form id="form" autocomplete="off">
+      <input type="text" id="peso" inputmode="decimal" pattern="[0-9]+([.,][0-9])?" placeholder="74,6" required>
+      <input type="date" id="fecha" required>
+      <button class="btn" type="submit">Guardar</button>
+    </form>
+    <p class="msg" id="msg"></p>
+  </section>
+
+  <section class="card">
+    <div class="row">
+      <h2>Evolución</h2>
+      <div class="seg" id="seg"><button data-m="pct" class="on">% perdido</button><button data-m="kg">kg</button></div>
+    </div>
+    <div class="chartbox"><canvas id="chart"></canvas></div>
+    <p class="hint">Línea: media de 7 días · Puntos: pesaje de cada día · Discontinua: meta</p>
+  </section>
+
+  <section class="card">
+    <h2>Ligas mensuales</h2>
+    <div class="liga-score" id="ligaScore"></div>
+    <div id="ligas"></div>
+  </section>
+
+  <section class="card">
+    <h2>Historial</h2>
+    <div id="hist"></div>
+  </section>
+</main>
+
+<div class="modal" id="modal" hidden>
+  <div class="card">
+    <h2>¿Quién eres?</h2>
+    <div class="who" id="whoBtns"></div>
+    <input type="password" id="pin" inputmode="numeric" maxlength="4" placeholder="PIN (4 cifras)" style="width:100%">
+    <p class="msg" id="pinMsg"></p>
+    <button class="btn" id="pinOk" style="width:100%">Entrar</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script>
+/* ============ CONFIGURACIÓN (lo único que tienes que tocar) ============ */
+const CONFIG = {
+  SUPABASE_URL: 'https://eypmagizkoqxuvpmjdyx.supabase.co',          // ej: https://abcdxyz.supabase.co
+  SUPABASE_KEY: 'sb_publishable_eC3_ykvGqLU-JMKkA5aiCw_BQH2TeFV',        // publishable key (o anon key)
+  INICIO: '2026-11-10',
+  META_PCT: 15,
+  PERSONAS: {
+    david: { nombre: 'David', inicial: 75.8, pin: '1111' },
+    laura: { nombre: 'Laura', inicial: 63.0, pin: '2222' },
+  },
+};
+/* ====================================================================== */
+
+const P = CONFIG.PERSONAS, IDS = Object.keys(P);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const color = id => css('--' + id);
+const $ = s => document.querySelector(s);
+const ymd = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+const hoy = () => ymd(new Date());
+const addDays = (s, n) => { const d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return ymd(d); };
+const fmt = (n, dec = 1) => Number(n).toLocaleString('es-ES', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+const fechaCorta = f => new Date(f + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+const metaKg = id => +(P[id].inicial * (1 - CONFIG.META_PCT / 100)).toFixed(1);
+const pct = (id, peso) => (P[id].inicial - peso) / P[id].inicial * 100;
+
+/* ---------- almacenamiento ---------- */
+const mem = {};
+const ls = {
+  get(k) { try { return localStorage.getItem(k); } catch { return mem[k] ?? null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch { mem[k] = v; } },
+  del(k) { try { localStorage.removeItem(k); } catch { delete mem[k]; } },
+};
+const configurado = CONFIG.SUPABASE_URL.startsWith('https://');
+const sb = configurado && window.supabase ? supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY) : null;
+
+const store = {
+  async all() {
+    if (sb) {
+      const { data, error } = await sb.from('pesos').select('persona,fecha,peso').order('fecha');
+      if (error) throw error;
+      return data;
+    }
+    return JSON.parse(ls.get('demo_pesos') || 'null') ?? IDS.map(id => ({ persona: id, fecha: CONFIG.INICIO, peso: P[id].inicial }));
+  },
+  async put(persona, fecha, peso) {
+    if (sb) {
+      const { error } = await sb.from('pesos').upsert({ persona, fecha, peso }, { onConflict: 'persona,fecha' });
+      if (error) throw error; return;
+    }
+    const rows = (await store.all()).filter(r => !(r.persona === persona && r.fecha === fecha));
+    rows.push({ persona, fecha, peso }); ls.set('demo_pesos', JSON.stringify(rows));
+  },
+  async del(persona, fecha) {
+    if (sb) {
+      const { error } = await sb.from('pesos').delete().eq('persona', persona).eq('fecha', fecha);
+      if (error) throw error; return;
+    }
+    ls.set('demo_pesos', JSON.stringify((await store.all()).filter(r => !(r.persona === persona && r.fecha === fecha))));
+  },
+};
+
+/* ---------- datos y cálculos ---------- */
+let datos = Object.fromEntries(IDS.map(id => [id, new Map()]));
+const serie = id => [...datos[id].entries()].sort((a, b) => a[0] < b[0] ? -1 : 1);
+const ultimo = id => { const s = serie(id); return s.length ? s[s.length - 1] : [CONFIG.INICIO, P[id].inicial]; };
+const perdidoKg = id => P[id].inicial - ultimo(id)[1];
+
+function media7(id, f) {
+  if (f > ultimo(id)[0]) return null;
+  let sum = 0, n = 0;
+  for (let i = 0; i < 7; i++) { const v = datos[id].get(addDays(f, -i)); if (v != null) { sum += v; n++; } }
+  return n ? sum / n : null;
+}
+function racha(id) {
+  let d = hoy(); if (!datos[id].has(d)) d = addDays(d, -1);
+  let n = 0; while (datos[id].has(d)) { n++; d = addDays(d, -1); }
+  return n;
+}
+function ganador() {
+  let best = null;
+  for (const id of IDS) {
+    const hit = serie(id).find(([, p]) => p <= metaKg(id));
+    if (hit && (!best || hit[0] < best.fecha)) best = { id, fecha: hit[0] };
+  }
+  return best;
+}
+const nextMonth = m => { let [y, mo] = m.split('-').map(Number); mo++; if (mo > 12) { mo = 1; y++; } return `${y}-${String(mo).padStart(2, '0')}`; };
+function ligas() {
+  const res = [], fin = hoy().slice(0, 7);
+  for (let m = CONFIG.INICIO.slice(0, 7); m <= fin; m = nextMonth(m)) {
+    const ini = m + '-01', sig = nextMonth(m) + '-01', fila = { mes: m, enCurso: m === fin, v: {} };
+    for (const id of IDS) {
+      const s = serie(id);
+      const antes = s.filter(([f]) => f < ini), dentro = s.filter(([f]) => f >= ini && f < sig);
+      const ref = antes.length ? antes[antes.length - 1][1] : P[id].inicial;
+      const end = dentro.length ? dentro[dentro.length - 1][1] : ref;
+      fila.v[id] = (ref - end) / P[id].inicial * 100;
+    }
+    const [a, b] = IDS, d = fila.v[a] - fila.v[b];
+    fila.gana = Math.abs(d) < 0.005 ? null : (d > 0 ? a : b);
+    res.push(fila);
+  }
+  return res;
+}
+
+/* ---------- identidad ---------- */
+let yo = ls.get('quien'); if (!P[yo]) yo = null;
+let elegido = null;
+function pintaQuien() {
+  $('#quienBtn').textContent = yo ? `${P[yo].nombre} · cambiar` : '¿Quién eres?';
+  $('#formTit').textContent = yo ? `Pesaje de ${P[yo].nombre}` : 'Pesaje de hoy';
+  document.documentElement.style.setProperty('--me', yo ? color(yo) : css('--david'));
+}
+function abrirModal() {
+  elegido = yo; $('#pin').value = ''; $('#pinMsg').textContent = '';
+  $('#whoBtns').innerHTML = IDS.map(id => `<button data-id="${id}" style="--c:${color(id)}" class="${id === elegido ? 'sel' : ''}">${P[id].nombre}</button>`).join('');
+  $('#modal').hidden = false;
+}
+$('#whoBtns').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  elegido = b.dataset.id;
+  [...$('#whoBtns').children].forEach(x => x.classList.toggle('sel', x === b));
+  $('#pin').focus();
+};
+$('#pinOk').onclick = () => {
+  if (!elegido) return $('#pinMsg').textContent = 'Elige quién eres';
+  if ($('#pin').value !== P[elegido].pin) return $('#pinMsg').textContent = 'PIN incorrecto';
+  yo = elegido; ls.set('quien', yo); $('#modal').hidden = true; pintaQuien(); render();
+};
+$('#pin').onkeydown = e => { if (e.key === 'Enter') $('#pinOk').click(); };
+$('#modal').onclick = e => { if (e.target.id === 'modal' && yo) $('#modal').hidden = true; };
+$('#quienBtn').onclick = abrirModal;
+
+/* ---------- render ---------- */
+function render() {
+  const g = ganador();
+  const leader = IDS.slice().sort((a, b) => pct(b, ultimo(b)[1]) - pct(a, ultimo(a)[1]))[0];
+  const empate = Math.abs(pct(IDS[0], ultimo(IDS[0])[1]) - pct(IDS[1], ultimo(IDS[1])[1])) < 0.005;
+
+  const gEl = $('#ganador');
+  if (g) {
+    gEl.hidden = false; gEl.style.setProperty('--c', color(g.id));
+    gEl.innerHTML = `<div class="big">🏆 ¡${P[g.id].nombre} ha ganado!</div><div class="s">Llegó al -${CONFIG.META_PCT}% el ${fechaCorta(g.fecha)}</div>`;
+  } else gEl.hidden = true;
+
+  $('#score').innerHTML = IDS.map(id => {
+    const [f, peso] = ultimo(id), p = pct(id, peso), lost = P[id].inicial - peso;
+    const prog = Math.max(0, Math.min(100, p / CONFIG.META_PCT * 100));
+    const falta = peso - metaKg(id), r = racha(id);
+    const totalMeta = P[id].inicial - metaKg(id);
+    let h = ''; for (let k = 2; k < totalMeta; k += 2) h += `<b class="${lost >= k ? 'ok' : ''}">-${k}</b>`;
+    h += `<b class="${peso <= metaKg(id) ? 'ok' : ''}">🏁</b>`;
+    return `<div class="pl" style="--c:${color(id)}">
+      <div class="n">${P[id].nombre}${!empate && id === leader ? '<span class="lead">1º</span>' : ''}</div>
+      <div class="big">${p >= 0 ? '-' : '+'}${fmt(Math.abs(p))}%</div>
+      <div class="s">${fmt(peso)} kg · ${lost >= 0 ? '-' : '+'}${fmt(Math.abs(lost))} kg</div>
+      <div class="bar"><i style="width:${prog}%"></i></div>
+      <div class="s">${falta > 0 ? `Faltan ${fmt(falta)} kg (meta ${fmt(metaKg(id))})` : 'Meta alcanzada'}</div>
+      <div class="s">🔥 Racha: ${r} día${r === 1 ? '' : 's'}${f !== hoy() ? ' · <i>sin pesar hoy</i>' : ''}</div>
+      <div class="hitos">${h}</div>
+    </div>`;
+  }).join('');
+
+  pintaChart(); pintaLigas(); pintaHist();
+}
+
+let modo = 'pct', chart;
+$('#seg').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  modo = b.dataset.m; [...$('#seg').children].forEach(x => x.classList.toggle('on', x === b)); pintaChart();
+};
+function pintaChart() {
+  let last = CONFIG.INICIO;
+  for (const id of IDS) if (ultimo(id)[0] > last) last = ultimo(id)[0];
+  if (addDays(CONFIG.INICIO, 6) > last) last = addDays(CONFIG.INICIO, 6);
+  const fechas = []; for (let f = CONFIG.INICIO; f <= last; f = addDays(f, 1)) fechas.push(f);
+  const muted = css('--muted'), line = css('--line'), ds = [];
+  for (const id of IDS) {
+    const c = color(id), conv = v => v == null ? null : +(modo === 'pct' ? pct(id, v) : v).toFixed(2);
+    ds.push({ label: P[id].nombre, data: fechas.map(f => conv(media7(id, f))), borderColor: c, backgroundColor: c, borderWidth: 3, tension: .3, pointRadius: 0, spanGaps: true });
+    ds.push({ label: '·' + id, data: fechas.map(f => conv(datos[id].get(f) ?? null)), showLine: false, pointRadius: 3, pointBackgroundColor: c + '99', pointBorderWidth: 0 });
+    if (modo === 'kg') ds.push({ label: '·meta' + id, data: fechas.map(() => metaKg(id)), borderColor: c, borderDash: [6, 6], borderWidth: 1.5, pointRadius: 0 });
+  }
+  if (modo === 'pct') ds.push({ label: '·meta', data: fechas.map(() => CONFIG.META_PCT), borderColor: muted, borderDash: [6, 6], borderWidth: 1.5, pointRadius: 0 });
+
+  const sufijo = modo === 'pct' ? '%' : ' kg';
+  const opts = {
+    responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { color: muted, usePointStyle: true, boxWidth: 8, filter: i => !i.text.startsWith('·') } },
+      tooltip: { filter: i => !i.dataset.label.startsWith('·meta') && i.raw != null,
+        callbacks: { title: it => fechaCorta(fechas[it[0].dataIndex]),
+          label: i => `${i.dataset.label.startsWith('·') ? P[i.dataset.label.slice(1)].nombre + ' (día)' : i.dataset.label + ' (media)'}: ${fmt(i.raw)}${sufijo}` } },
+    },
+    scales: {
+      x: { ticks: { color: muted, maxRotation: 0, autoSkip: true, maxTicksLimit: 6, callback: (v, i) => fechaCorta(fechas[i]) }, grid: { display: false } },
+      y: { ticks: { color: muted, callback: v => fmt(v, 0) + sufijo }, grid: { color: line },
+        ...(modo === 'pct' ? { suggestedMin: 0, suggestedMax: CONFIG.META_PCT + 1 } : {}) },
+    },
+  };
+  if (chart) chart.destroy();
+  chart = new Chart($('#chart'), { type: 'line', data: { labels: fechas, datasets: ds }, options: opts });
+}
+
+function pintaLigas() {
+  const L = ligas(), [a, b] = IDS;
+  const cerradas = L.filter(x => !x.enCurso);
+  const wa = cerradas.filter(x => x.gana === a).length, wb = cerradas.filter(x => x.gana === b).length;
+  $('#ligaScore').innerHTML = `<span class="d">${P[a].nombre} ${wa}</span><small>meses</small><span class="l">${wb} ${P[b].nombre}</span>`;
+  $('#ligas').innerHTML = L.slice().reverse().map(x => {
+    let nom = new Date(x.mes + "-15T12:00:00").toLocaleDateString("es-ES", { month: "long", year: "numeric" }); nom = nom[0].toUpperCase() + nom.slice(1);
+    const tag = x.gana
+      ? `<span class="tag" style="background:${color(x.gana)}">${x.enCurso ? 'Va ganando ' : ''}${P[x.gana].nombre}</span>`
+      : `<span class="tag" style="background:${css('--muted')}">Empate</span>`;
+    return `<div class="mes"><div class="t">${nom}<small>${x.enCurso ? 'En curso' : 'Cerrada'}</small></div>
+      <div class="v"><span style="color:${color(a)}">${fmt(x.v[a], 2)}%</span><br><span style="color:${color(b)}">${fmt(x.v[b], 2)}%</span></div>${tag}</div>`;
+  }).join('');
+}
+
+function pintaHist() {
+  const rows = [];
+  for (const id of IDS) { const s = serie(id); s.forEach(([f, p], i) => rows.push({ id, f, p, d: i ? p - s[i - 1][1] : null })); }
+  rows.sort((x, y) => x.f < y.f ? 1 : x.f > y.f ? -1 : (x.id < y.id ? -1 : 1));
+  $('#hist').innerHTML = rows.length ? rows.slice(0, 20).map(r => `<div class="h">
+      <span class="dot" style="background:${color(r.id)}"></span>
+      <span><span class="f">${fechaCorta(r.f)}</span> · ${P[r.id].nombre}</span>
+      <span class="p">${fmt(r.p)}</span>
+      <span class="df ${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}">${r.d == null ? 'inicio' : (r.d > 0 ? '+' : '') + fmt(r.d)}${r.id === yo && r.f !== CONFIG.INICIO ? `<button class="x" data-f="${r.f}" title="Borrar">×</button>` : ''}</span>
+    </div>`).join('') : '<p class="empty">Todavía no hay pesajes.</p>';
+}
+$('#hist').onclick = async e => {
+  const b = e.target.closest('.x'); if (!b || !yo) return;
+  if (!confirm(`¿Borrar el pesaje del ${fechaCorta(b.dataset.f)}?`)) return;
+  try { await store.del(yo, b.dataset.f); await cargar(); } catch (err) { alert('No se pudo borrar: ' + err.message); }
+};
+
+/* ---------- guardar ---------- */
+$('#fecha').value = hoy(); $('#fecha').max = hoy(); $('#fecha').min = CONFIG.INICIO;
+$('#form').onsubmit = async e => {
+  e.preventDefault();
+  if (!yo) return abrirModal();
+  const peso = Math.round(parseFloat(String($('#peso').value).replace(',', '.')) * 10) / 10;
+  const fecha = $('#fecha').value;
+  if (!(peso >= 30 && peso <= 250)) return $('#msg').textContent = 'Ese peso no parece correcto.';
+  const antes = perdidoKg(yo), habia = datos[yo].has(fecha), gAntes = ganador();
+  $('#msg').textContent = 'Guardando…';
+  try {
+    await store.put(yo, fecha, peso);
+    await cargar();
+    const despues = perdidoKg(yo), g = ganador();
+    $('#msg').textContent = `${habia ? 'Actualizado' : 'Guardado'}: ${fmt(peso)} kg el ${fechaCorta(fecha)}.`;
+    $('#peso').value = '';
+    if ((g && !gAntes) || Math.floor(despues / 2) > Math.floor(Math.max(antes, 0) / 2)) celebrar();
+  } catch (err) { $('#msg').textContent = 'Error al guardar: ' + err.message; }
+};
+function celebrar() {
+  if (!window.confetti) return;
+  const c = color(yo);
+  confetti({ particleCount: 140, spread: 80, origin: { y: .7 }, colors: [c, '#ffffff', '#facc15'] });
+}
+
+/* ---------- carga y sincronización ---------- */
+async function cargar() {
+  try {
+    const rows = await store.all();
+    datos = Object.fromEntries(IDS.map(id => [id, new Map()]));
+    for (const r of rows) if (datos[r.persona]) datos[r.persona].set(r.fecha, Number(r.peso));
+    render();
+  } catch (err) {
+    $('#aviso').hidden = false; $('#aviso').textContent = 'No se pudieron cargar los datos: ' + err.message;
+  }
+}
+const d0 = new Date(CONFIG.INICIO + 'T12:00:00');
+$('#sub').textContent = `Meta: -${CONFIG.META_PCT}% · desde el ${d0.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}`;
+if (!sb) { $('#aviso').hidden = false; $('#aviso').textContent = 'Modo prueba: los datos solo se guardan en este móvil. Configura Supabase para compartirlos.'; }
+pintaQuien(); cargar();
+if (!yo) abrirModal();
+if (sb) sb.channel('pesos').on('postgres_changes', { event: '*', schema: 'public', table: 'pesos' }, cargar).subscribe();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { $('#fecha').max = hoy(); cargar(); } });
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { pintaQuien(); render(); });
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
