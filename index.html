@@ -143,6 +143,9 @@ a.btn{display:block;text-align:center;text-decoration:none}
 .colors button{width:34px;height:34px;border-radius:50%;border:3px solid var(--card);background:var(--c);box-shadow:0 0 0 1px var(--line)}
 .colors button.sel{box-shadow:0 0 0 3px var(--c)}
 .colors button:disabled{opacity:.2;cursor:not-allowed}
+.ayuda h3{font-size:15px;margin:16px 0 4px}
+.ayuda p{margin:0 0 8px;font-size:14px;line-height:1.5}
+.ayuda .row{position:sticky;top:-16px;background:var(--card);padding:4px 0 8px;margin-top:-4px}
 .link{background:none;border:0;color:var(--accent);font-weight:600;padding:8px 0;width:100%}
 @media (prefers-reduced-motion: reduce){.runner,.lane .trail,.bar i{transition:none}}
 </style>
@@ -151,7 +154,7 @@ a.btn{display:block;text-align:center;text-decoration:none}
 <main>
   <header>
     <h1>La Carrera <span id="sub"></span></h1>
-    <button class="chip-btn" id="quienBtn" type="button">¿Quién eres?</button>
+    <div style="display:flex;gap:6px"><button class="chip-btn" id="ayudaBtn" type="button" aria-label="Ayuda">?</button><button class="chip-btn" id="quienBtn" type="button">¿Quién eres?</button></div>
   </header>
 
   <div class="aviso" id="aviso" hidden></div>
@@ -199,6 +202,31 @@ a.btn{display:block;text-align:center;text-decoration:none}
   </section>
 </main>
 
+<div class="modal" id="ayuda" style="z-index:12" hidden>
+  <div class="card ayuda">
+    <div class="row"><h2>Ayuda</h2><button class="chip-btn" id="ayudaCerrar" type="button">Cerrar</button></div>
+    <h3>Cómo se gana</h3>
+    <p>Gana quien antes pierda el <b>8 % de su peso de salida</b>. Se cuenta en porcentaje y no en kilos para que sea justo entre personas que pesan distinto. La meta de cada uno en kilos sale en la gráfica (modo kg) como una línea discontinua.</p>
+    <h3>Pesarte</h3>
+    <p>Arriba, <b>¿Quién eres?</b>: eliges tu nombre y pones tu PIN de 4 cifras (es para que nadie apunte en tu nombre). El móvil lo recuerda.</p>
+    <p>Escribe el peso y guarda. La fecha es hoy, pero puedes cambiarla para apuntar un día que se te olvidó. Si apuntas dos veces el mismo día, vale el último.</p>
+    <p>Con el <b>atajo de la báscula</b> (al final de la página) no tienes que escribir nada: al pesarte, el peso pasa solo de la app Salud a La Carrera.</p>
+    <h3>La pista y la gráfica</h3>
+    <p>Cada corredor avanza hacia la bandera de meta según el % que lleva perdido. <b>% perdido / kg</b> cambia cómo se ve la gráfica.</p>
+    <p>Las líneas son la <b>media de 7 días</b> (así un día de retención no cambia la carrera) y los puntos, cada pesaje. Para quitarle el liderato a alguien hay que sacarle al menos 0,15 puntos de media.</p>
+    <p><b>Ventaja</b>: cuántos puntos saca el primero. <b>Cambios</b>: cuántas veces ha cambiado el líder (⚡ en la gráfica). <b>Días líder</b>: los días que ha ido delante cada uno.</p>
+    <p>🔮 <b>El oráculo</b> calcula, con el ritmo de cada uno, quién llegaría antes a la meta y si el segundo alcanza al primero.</p>
+    <h3>Ligas mensuales</h3>
+    <p>Cada mes es una mini carrera: lo gana quien más % pierde ese mes, contando desde su último peso del mes anterior. El marcador suma los meses ganados.</p>
+    <h3>Historial y reacciones</h3>
+    <p>Todos los pesajes. Puedes reaccionar a los de los demás con un emoji (🔥 👏 💪 😱 😂 🐢) y verás arriba cuando alguien reaccione a los tuyos. Los tuyos los puedes borrar.</p>
+    <h3>Sin conexión</h3>
+    <p>Sin cobertura se ven los últimos datos que cargó el móvil, con un aviso arriba de cuándo son. Para apuntar hace falta conexión.</p>
+    <h3>En el iPhone</h3>
+    <p>Ábrela en Safari y pulsa <b>Compartir → Añadir a pantalla de inicio</b> para tenerla como una app.</p>
+  </div>
+</div>
+
 <div class="modal" id="modal" hidden>
   <div class="card">
     <!-- entrar -->
@@ -209,6 +237,7 @@ a.btn{display:block;text-align:center;text-decoration:none}
       <p class="msg" id="pinMsg"></p>
       <button class="btn" id="pinOk" type="button" style="width:100%">Entrar</button>
       <button class="link" id="irAlta" type="button">¿Nuevo? Únete a la carrera</button>
+      <button class="link" type="button" onclick="document.getElementById('ayuda').hidden=false">¿Cómo funciona?</button>
     </div>
     <!-- alta -->
     <div id="vAlta" hidden>
@@ -873,6 +902,9 @@ if (sb) sb.channel('carrera')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'participantes' }, cargar)
   .subscribe();
 window.addEventListener('online', cargar);
+$('#ayudaBtn').onclick = () => { $('#ayuda').hidden = false; $('#ayuda .card').scrollTop = 0; };
+$('#ayudaCerrar').onclick = () => { $('#ayuda').hidden = true; };
+$('#ayuda').onclick = e => { if (e.target.id === 'ayuda') $('#ayuda').hidden = true; };
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { $('#fecha').max = hoy(); cargar(); } });
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => render());
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
