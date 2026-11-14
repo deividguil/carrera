@@ -1,5 +1,5 @@
 // Primero red, si no hay conexión tira de caché. Los datos (Supabase) nunca se cachean.
-const CACHE = 'carrera-v2';
+const CACHE = 'carrera-v3';
 self.addEventListener('install', e => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', e => {

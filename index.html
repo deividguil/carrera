@@ -277,35 +277,53 @@ const DEMO = window.DEMO_DATA || {
   pesos: [], reacciones: [],
 };
 async function q(p) { const { data, error } = await p; if (error) throw error; return data; }
+// Sin conexión: se enseña la última copia guardada en el móvil y no se deja apuntar nada
+const SNAP = 'carrera-snap';
+let OFFLINE = 0; // fecha (ms) de la copia que se está enseñando, 0 si hay conexión
+const sinRed = () => OFFLINE || navigator.onLine === false;
+function exigeRed() { if (sinRed()) throw new Error('sin conexión. Vuelve a intentarlo cuando tengas cobertura.'); }
 const store = {
   async cargar() {
     if (!sb) return { participantes: DEMO.participantes, pesos: DEMO.pesos, reacciones: DEMO.reacciones };
-    const [participantes, pesos, reacciones] = await Promise.all([
-      q(sb.from('participantes').select('*').order('creado')),
-      q(sb.from('pesos').select('persona,fecha,peso').order('fecha')),
-      q(sb.from('reacciones').select('*')),
-    ]);
-    return { participantes, pesos, reacciones };
+    try {
+      const [participantes, pesos, reacciones] = await Promise.all([
+        q(sb.from('participantes').select('*').order('creado')),
+        q(sb.from('pesos').select('persona,fecha,peso').order('fecha')),
+        q(sb.from('reacciones').select('*')),
+      ]);
+      const d = { participantes, pesos, reacciones };
+      OFFLINE = 0; ls.set(SNAP, JSON.stringify({ t: Date.now(), d }));
+      return d;
+    } catch (err) {
+      const raw = ls.get(SNAP); let snap = null; try { snap = raw && JSON.parse(raw); } catch {}
+      if (!snap || !/fetch|network|load failed|conexi/i.test(String(err.message || err))) throw err;
+      OFFLINE = snap.t; return snap.d;
+    }
   },
   async alta(p) {
+    if (sb) exigeRed();
     if (sb) return q(sb.from('participantes').insert(p));
     DEMO.participantes.push(p);
   },
   async peso(persona, fecha, peso) {
+    if (sb) exigeRed();
     if (sb) return q(sb.from('pesos').upsert({ persona, fecha, peso }, { onConflict: 'persona,fecha' }));
     DEMO.pesos = DEMO.pesos.filter(r => !(r.persona === persona && r.fecha === fecha));
     DEMO.pesos.push({ persona, fecha, peso });
   },
   async borrarPeso(persona, fecha) {
+    if (sb) exigeRed();
     if (sb) return q(sb.from('pesos').delete().eq('persona', persona).eq('fecha', fecha));
     DEMO.pesos = DEMO.pesos.filter(r => !(r.persona === persona && r.fecha === fecha));
   },
   async reaccion(de, para, fecha, emoji) {
+    if (sb) exigeRed();
     if (sb) return q(sb.from('reacciones').upsert({ de, para, fecha, emoji, creado: new Date().toISOString() }, { onConflict: 'de,para,fecha' }));
     DEMO.reacciones = DEMO.reacciones.filter(r => !(r.de === de && r.para === para && r.fecha === fecha));
     DEMO.reacciones.push({ de, para, fecha, emoji, creado: new Date().toISOString() });
   },
   async quitarReaccion(de, para, fecha) {
+    if (sb) exigeRed();
     if (sb) return q(sb.from('reacciones').delete().eq('de', de).eq('para', para).eq('fecha', fecha));
     DEMO.reacciones = DEMO.reacciones.filter(r => !(r.de === de && r.para === para && r.fecha === fecha));
   },
@@ -834,6 +852,11 @@ async function cargar() {
     for (const r of d.pesos) if (datos[r.persona]) datos[r.persona].set(r.fecha, Number(r.peso));
     reac = d.reacciones || [];
     $('#sub').textContent = `Meta: −${CONFIG.META_PCT}% · ${IDS.length} en la pista`;
+    if (OFFLINE) {
+      const t = new Date(OFFLINE);
+      $('#aviso').hidden = false;
+      $('#aviso').textContent = `Sin conexión · datos del ${t.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}, ${t.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}. Puedes consultar, pero no apuntar.`;
+    } else if (sb) $('#aviso').hidden = true;
     pintaQuien(); render();
   } catch (err) {
     $('#aviso').hidden = false;
@@ -849,6 +872,7 @@ if (sb) sb.channel('carrera')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'reacciones' }, cargar)
   .on('postgres_changes', { event: '*', schema: 'public', table: 'participantes' }, cargar)
   .subscribe();
+window.addEventListener('online', cargar);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { $('#fecha').max = hoy(); cargar(); } });
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => render());
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
